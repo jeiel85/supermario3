@@ -1,6 +1,21 @@
 // Super Mario Bros. 3 WebAssembly NES Emulation Engine
 import { Nostalgist } from 'nostalgist';
 
+export function resolveAssetUrl(path) {
+  if (!path) return '';
+  if (typeof path !== 'string') return path;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:') || path.startsWith('data:')) {
+    return path;
+  }
+  const cleanPath = path.replace(/^\/+/, '');
+  const base = import.meta.env.BASE_URL || '/';
+  const cleanBase = base.replace(/^\/+/, '').replace(/\/+$/, '');
+  const fullPath = (cleanBase && cleanPath.startsWith(cleanBase))
+    ? cleanPath
+    : (cleanBase ? `${cleanBase}/${cleanPath}` : cleanPath);
+  return new URL(fullPath, window.location.origin).href;
+}
+
 export class EmulatorEngine {
   constructor(options = {}) {
     this.canvasContainer = options.canvasContainer || document.getElementById('screen-wrapper');
@@ -20,15 +35,6 @@ export class EmulatorEngine {
 
   async launch(romSource = null, romName = 'Super Mario Bros. 3 (USA)') {
     try {
-      const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
-      
-      let finalRomSource = romSource;
-      if (!finalRomSource) {
-        finalRomSource = new URL(`${baseUrl}roms/smb3.nes`, window.location.href).href;
-      } else if (typeof finalRomSource === 'string' && !finalRomSource.startsWith('http://') && !finalRomSource.startsWith('https://') && !finalRomSource.startsWith('blob:') && !finalRomSource.startsWith('data:')) {
-        finalRomSource = new URL(finalRomSource, window.location.href).href;
-      }
-
       this.onStatusChange('loading', '슈퍼마리오 3 엔진 시동 중...');
       this.currentRomName = romName;
 
@@ -53,15 +59,31 @@ export class EmulatorEngine {
       canvas.tabIndex = 1;
       this.canvasContainer.appendChild(canvas);
 
+      // Resolve and fetch ROM binary to avoid Nostalgist URL resolution quirks
+      let finalRom = romSource || 'roms/smb3.nes';
+      if (typeof finalRom === 'string') {
+        const resolvedUrl = resolveAssetUrl(finalRom);
+        console.log(`[EmulatorEngine] Fetching ROM from: ${resolvedUrl}`);
+        const res = await fetch(resolvedUrl);
+        if (!res.ok) {
+          throw new Error(`ROM 파일을 불러올 수 없습니다. (${res.status} ${res.statusText})\nURL: ${resolvedUrl}`);
+        }
+        const blob = await res.blob();
+        finalRom = {
+          fileName: 'smb3.nes',
+          fileContent: blob,
+        };
+      }
+
       // Launch with local core and fallback
       this.nostalgist = await Nostalgist.launch({
         core: 'fceumm',
-        rom: finalRomSource,
+        rom: finalRom,
         element: canvas,
         respondToGlobalEvents: true,
         async resolveCoreJs(core) {
           try {
-            const url = new URL(`${baseUrl}cores/fceumm_libretro.js`, window.location.href).href;
+            const url = resolveAssetUrl('cores/fceumm_libretro.js');
             const res = await fetch(url);
             if (res.ok) return await res.blob();
           } catch (e) {
@@ -72,7 +94,7 @@ export class EmulatorEngine {
         },
         async resolveCoreWasm(core) {
           try {
-            const url = new URL(`${baseUrl}cores/fceumm_libretro.wasm`, window.location.href).href;
+            const url = resolveAssetUrl('cores/fceumm_libretro.wasm');
             const res = await fetch(url);
             if (res.ok) return await res.blob();
           } catch (e) {

@@ -214,8 +214,18 @@ async function initApp() {
   const startDemoBtn = document.getElementById('btn-start-demo-action');
   const startSplash = document.getElementById('start-demo-splash');
   if (startDemoBtn && startSplash) {
-    startDemoBtn.addEventListener('click', () => {
+    startDemoBtn.addEventListener('click', async () => {
       startSplash.classList.add('hidden');
+      if (!engine.nostalgist) {
+        try {
+          await engine.launch();
+        } catch (e) {
+          showNotification(`엔진 시동 실패: ${e.message}`, 'error');
+          startSplash.classList.remove('hidden');
+          return;
+        }
+      }
+      engine.resume();
       engine.getCanvas()?.focus();
       showNotification('라이브 데모가 시작되었습니다! 60FPS 칩튠 사운드 활성화 완료', 'success');
     });
@@ -279,9 +289,9 @@ async function initApp() {
 
   // 7. Auto-Launch Super Mario Bros. 3 (USA Rev 1)
   try {
-    await engine.launch('/roms/smb3.nes', 'Super Mario Bros. 3 (USA Rev 1)');
+    await engine.launch();
   } catch (err) {
-    console.warn('Initial launch error, fallback available:', err);
+    console.warn('Initial launch error, fallback available on Start Demo:', err);
   }
 }
 
