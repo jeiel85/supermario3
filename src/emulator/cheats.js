@@ -70,6 +70,55 @@ export const SMB3_DEFAULT_CHEATS = [
     desc: '항상 버섯을 먹은 덩치 큰 수퍼 마리오 상태를 유지합니다.',
     enabled: false,
   },
+  {
+    id: 'world_2_start',
+    code: 'PEUZUGAA',
+    name: '🌐 월드 2 (사막의 나라)에서 시작',
+    desc: '게임 시작 시 사막, 유사, 피라미드가 있는 월드 2 맵으로 직행합니다.',
+    enabled: false,
+  },
+  {
+    id: 'world_3_start',
+    code: 'ZEUZUGAA',
+    name: '🌐 월드 3 (물의 나라)에서 시작',
+    desc: '게임 시작 시 바다와 카누가 있는 거대 물의 나라 월드 3으로 직행합니다.',
+    enabled: false,
+  },
+  {
+    id: 'world_4_start',
+    code: 'LEUZUGAA',
+    name: '🌐 월드 4 (거인의 나라)에서 시작',
+    desc: '거대 굼바와 엉금엉금이 등장하는 전설의 거인국 월드 4로 직행합니다.',
+    enabled: false,
+  },
+  {
+    id: 'world_5_start',
+    code: 'GEUZUGAA',
+    name: '🌐 월드 5 (하늘의 나라)에서 시작',
+    desc: '스카이 타워와 구름 위 왕국, 쿠리보 신발이 있는 월드 5로 직행합니다.',
+    enabled: false,
+  },
+  {
+    id: 'world_6_start',
+    code: 'IEUZUGAA',
+    name: '🌐 월드 6 (얼음의 나라)에서 시작',
+    desc: '미끄러운 얼음과 동결 코인이 가득한 얼음의 나라 월드 6으로 직행합니다.',
+    enabled: false,
+  },
+  {
+    id: 'world_7_start',
+    code: 'TEUZUGAA',
+    name: '🌐 월드 7 (토관의 나라)에서 시작',
+    desc: '미로 토관과 거대 뻐끔플라워가 도사리는 토관의 나라 월드 7로 직행합니다.',
+    enabled: false,
+  },
+  {
+    id: 'world_8_start',
+    code: 'YEUZUGAA',
+    name: '🌐 월드 8 (암흑 쿠파 성)에서 시작',
+    desc: '전차, 전함, 공군 비행선과 최종 대마왕 쿠파 성이 있는 월드 8로 직행합니다.',
+    enabled: false,
+  },
 ];
 
 export class CheatManager {
