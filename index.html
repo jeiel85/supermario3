@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>슈퍼마리오 브라더스 3 (Super Mario Bros. 3) - 100% 웹앱</title>
+  <link rel="stylesheet" href="/src/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍄</text></svg>">
+</head>
+<body>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="mario-logo-badge">
+        <span class="badge-icon">🍄</span>
+        <span class="badge-title">SUPER MARIO BROS. 3</span>
+      </div>
+      <div class="brand-meta">
+        <span class="status-pill active" id="engine-status-pill">FCEUMM 60FPS</span>
+        <span class="status-pill gamepad-pill" id="gamepad-status-pill">🎮 패드 미연결</span>
+      </div>
+    </div>
+
+    <!-- Header Toolbar Actions -->
+    <div class="header-actions">
+      <button class="toolbar-btn btn-save" id="btn-quick-save" title="빠른 저장 (F1)">
+        💾 퀵 세이브
+      </button>
+      <button class="toolbar-btn btn-load" id="btn-quick-load" title="빠른 불러오기 (F2)">
+        📂 퀵 로드
+      </button>
+      <button class="toolbar-btn" id="btn-open-slots" title="6개 비주얼 세이브 슬롯 관리">
+        🗄️ 슬롯
+      </button>
+      <button class="toolbar-btn" id="btn-toggle-pause" title="일시정지 (P)">
+        ⏸️ 일시정지
+      </button>
+      <button class="toolbar-btn" id="btn-fast-forward" title="가속 (Tab)">
+        ⏩ 2x 배속
+      </button>
+      <button class="toolbar-btn" id="btn-rewind" title="되감기 (R)">
+        ⏪ 되감기
+      </button>
+      <button class="toolbar-btn" id="btn-restart" title="처음부터 다시 시작">
+        🔄 리셋
+      </button>
+      <button class="toolbar-btn btn-cheats" id="btn-open-cheats" title="Game Genie 치트 엔진">
+        🧙 치트
+      </button>
+      <button class="toolbar-btn btn-guide" id="btn-open-guide" title="3대 피리 및 비밀 공략집">
+        📖 공략집
+      </button>
+      <button class="toolbar-btn" id="btn-open-settings" title="화면/오디오/키 설정">
+        ⚙️ 설정
+      </button>
+      <button class="toolbar-btn" id="btn-fullscreen" title="전체화면 (F)">
+        ⛶ 전체화면
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Arcade Stage Area -->
+  <main class="arcade-viewport-container" id="arcade-viewport">
+    <div class="arcade-cabinet crt-light" id="arcade-container">
+      <div class="cabinet-top-header">
+        <span>★ 1988 NINTENDO / FAMICOM ★</span>
+        <span id="cabinet-rom-title">SUPER MARIO BROS. 3 (USA REV 1)</span>
+        <span>MMC3 MAPPER 4</span>
+      </div>
+
+      <!-- Canvas Screen Frame -->
+      <div class="nes-screen-wrapper" id="screen-wrapper">
+        <div class="crt-overlay"></div>
+        <div class="screen-hud-overlay">
+          <div class="hud-tag" id="hud-speed-tag" style="display: none;">2.0X</div>
+          <div class="hud-tag rewind-active" id="hud-rewind-tag" style="display: none;">REWIND</div>
+          <div class="hud-tag" id="hud-pause-tag" style="display: none;">PAUSED</div>
+        </div>
+        <!-- Canvas is created dynamically by Engine here -->
+      </div>
+
+      <!-- Cabinet Bottom Bar -->
+      <div class="cabinet-bottom-controls">
+        <label class="rom-drop-trigger" title="클릭하여 다른 NES 롬 또는 개조 롬 불러오기">
+          <span>📁 커스텀 롬 불러오기</span>
+          <input type="file" id="custom-rom-input" accept=".nes" style="display: none;" />
+        </label>
+
+        <div class="quick-keys-hint">
+          <span><kbd>Z</kbd> 달리기/꼬리/파이어</span>
+          <span><kbd>X</kbd> 점프</span>
+          <span><kbd>Enter</kbd> 시작</span>
+          <span><kbd>Shift</kbd> 선택</span>
+          <span><kbd>F1</kbd>/<kbd>F2</kbd> 저장/로드</span>
+          <span><kbd>R</kbd> 되감기</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Virtual Touch Controller for Mobile / Tablet -->
+    <div class="touch-controls-container" id="touch-controls"></div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Modal 1: Visual Save State Slots Modal -->
+  <div class="modal-backdrop" id="save-slots-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">🗄️ 비주얼 세이브 슬롯 (IndexedDB)</div>
+        <button class="modal-close-btn" id="close-slots-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #a4b0be; margin-bottom: 14px;">
+          각 슬롯에 스크린샷과 함께 현재 진행 상태가 저장됩니다. 브라우저를 닫아도 영구 유지되며, 파일로 다운로드하여 백업할 수 있습니다.
+        </p>
+        <div class="slots-grid" id="slots-grid"></div>
+
+        <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid #333850; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.82rem; color: #a4b0be;">외부 .state 파일 복원:</span>
+          <label class="toolbar-btn btn-load" style="cursor: pointer;">
+            <span>📂 세이브 파일 가져오기 (.state)</span>
+            <input type="file" id="import-state-file-input" accept=".state,.sav" style="display: none;" />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Game Genie Cheats Modal -->
+  <div class="modal-backdrop" id="cheats-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">🧙 Game Genie 치트 엔진</div>
+        <button class="modal-close-btn" id="close-cheats-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #a4b0be; margin-bottom: 14px;">
+          원하는 치트를 스위치로 켜고 끌 수 있습니다.
+        </p>
+        <div class="cheats-list" id="cheats-list"></div>
+
+        <!-- Add Custom Cheat -->
+        <div class="custom-cheat-box">
+          <h4>➕ 커스텀 Game Genie 코드 추가</h4>
+          <form class="custom-cheat-form" id="add-custom-cheat-form">
+            <input type="text" id="cheat-name-input" class="cheat-input" placeholder="치트 이름 (예: 무한 코인)" required />
+            <input type="text" id="cheat-code-input" class="cheat-input" placeholder="코드 (예: SLXPLOVS)" maxlength="8" required style="text-transform: uppercase; font-family: monospace;" />
+            <button type="submit" class="btn-add-cheat">추가</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Strategy Guide & Secrets Modal -->
+  <div class="modal-backdrop" id="guide-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">📖 슈퍼마리오 3 비기 & 공략 가이드</div>
+        <button class="modal-close-btn" id="close-guide-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-tabs">
+          <button class="guide-nav-tab active" data-tab="tab-whistle">마법의 피리 (워프 휘슬)</button>
+          <button class="guide-nav-tab" data-tab="tab-suits">변신 수트 & 특수 능력</button>
+          <button class="guide-nav-tab" data-tab="tab-secrets">보물 코인선 & 비기</button>
+          <button class="guide-nav-tab" data-tab="tab-controls">조작 테크닉 (비행법)</button>
+        </div>
+
+        <!-- Tab 1: Warp Whistles -->
+        <div class="guide-tab-pane active" id="tab-whistle">
+          <div class="guide-article">
+            <div class="guide-card gold">
+              <h4>🎺 마법의 피리 1: 월드 1-3 (풀의 나라)</h4>
+              <p>스테이지 종료 직전 끝자락에 있는 <strong>흰색 블록 위에서 [아래(↓)] 키를 약 5초간</strong> 누르고 있으면 마리오가 배경 뒤편으로 쏙 들어갑니다! 이 상태에서 오른쪽으로 끝까지 달려서 골인 지점 뒤쪽 검은 벽을 넘어가면 숨겨진 키노피오의 방에서 첫 번째 피리를 얻을 수 있습니다.</p>
+            </div>
+
+            <div class="guide-card gold">
+              <h4>🎺 마법의 피리 2: 월드 1 요새 (Fortress)</h4>
+              <p>꼬리 마리오(너구리) 상태로 요새에 진입합니다. 첫 번째 쿵쿵(Thwomp)을 지나 <strong>천장 위쪽으로 날아오르면</strong> 화면 상단 숨겨진 통로로 들어갈 수 있습니다. 오른쪽 끝으로 걸어가 [위(↑)] 키를 누르면 숨겨진 문이 열리고 두 번째 피리를 획득합니다.</p>
+            </div>
+
+            <div class="guide-card gold">
+              <h4>🎺 마법의 피리 3: 월드 2 사막 맵 (Desert Land)</h4>
+              <p>월드 2 맵 북동쪽 모서리에 바위로 막힌 길이 있습니다. 맵 위의 해머 브라더스를 쓰러뜨려 <strong>해머(망치) 아이템</strong>을 얻은 후, 인벤토리에서 해머를 사용해 해당 바위를 부수면 숨겨진 길에 파이어 브라더스가 나타납니다. 격파 시 세 번째 피리를 줍니다!</p>
+            </div>
+
+            <div class="guide-card blue">
+              <h4>⚡ 피리 2개로 월드 8 즉시 워프 콤보</h4>
+              <p>월드 1에서 피리 2개를 획득한 후 첫 번째 피리를 불어 월드 9(워프 존)로 이동합니다. 그 워프 존 섬 안에서 <strong>한 번 더 두 번째 피리를 불면 곧바로 최종 결전인 월드 8(암흑의 나라)</strong>로 직행할 수 있습니다!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Suits -->
+        <div class="guide-tab-pane" id="tab-suits">
+          <div class="guide-article">
+            <div class="guide-card">
+              <h4>🦝 너구리 마리오 (꼬리 / 수퍼나뭇잎)</h4>
+              <p>달리기로 하단 P-미터를 끝까지 채운 후 [A] 점프 버튼을 연타하면 하늘을 날아오를 수 있습니다. 떨어질 때도 [A] 버튼을 톡톡 연타하면 천천히 활공(글라이딩)하며 안전하게 착지할 수 있습니다. [B] 버튼으로 꼬리를 휘둘러 벽돌을 부수거나 적을 공격합니다.</p>
+            </div>
+
+            <div class="guide-card gold">
+              <h4>🗿 타누키 마리오 (지장보살 변신 수트)</h4>
+              <p>너구리의 모든 비행 능력에 더해 <strong>[아래(↓)] + [B] 버튼</strong>을 동시에 누르면 무적의 회색 돌부처(지장보살)로 변신합니다! 변신 중에는 쿵쿵이나 화염, 불꽃 등 적의 모든 공격을 튕겨내며 밟아 죽일 수 있습니다.</p>
+            </div>
+
+            <div class="guide-card blue">
+              <h4>🐸 개구리 수트 (수중 특화)</h4>
+              <p>물속에서 가라앉지 않고 방향키만으로 자유자재로 고속 수영을 할 수 있습니다. 3월드의 거대 뽀꾸뽀꾸(마리오를 한입에 삼켜 즉사시키는 거대 물고기)를 쉽게 회피할 수 있는 수중 최강의 장비입니다.</p>
+            </div>
+
+            <div class="guide-card green">
+              <h4>🔨 해머 수트 (궁극의 공격과 방어)</h4>
+              <p>[B] 버튼으로 던지는 망치는 일반 공격이 통하지 않는 쿵쿵, 부끄부끄(유령), 심지어 쿠파도 단 몇 방만에 쓰러뜨립니다. 또한 <strong>앉으면(↓) 마리오의 껍질이 강철 거북이 등껍질로 변하여 적의 모든 화염 공격을 100% 가드</strong>합니다.</p>
+            </div>
+
+            <div class="guide-card">
+              <h4>👞 쿠리보의 신발 (월드 5-3 전용)</h4>
+              <p>초록색 신발을 탄 적을 아래에서 치거나 뺏어 타면 뾰족한 가시돌이(Spiny)나 바닥의 가시밭 위를 마음껏 밟고 다닐 수 있습니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Secrets -->
+        <div class="guide-tab-pane" id="tab-secrets">
+          <div class="guide-article">
+            <div class="guide-card gold">
+              <h4>🚢 황금 보물 코인선 (White Treasure Ship) 출현 비법</h4>
+              <p>월드 1, 3, 5, 6에서 해머 브라더스를 수많은 코인과 1UP 버섯이 가득 찬 황금선으로 변신시키는 공식:<br />
+              1. 스테이지 클리어 시 <strong>보유 코인 수가 11의 배수</strong>(11, 22, 33, 44, 55, 66, 77, 88, 99)여야 함.<br />
+              2. <strong>점수의 10의 자리 숫자</strong>가 보유 코인 수의 일의 자리와 정확히 일치해야 함.<br />
+              3. 클리어 시점의 <strong>남은 타이머 초가 짝수</strong>여야 함.<br />
+              이 3가지를 맞추고 클리어하면 월드 맵의 해머 브라더스가 즉시 보물선으로 바뀝니다!</p>
+            </div>
+
+            <div class="guide-card">
+              <h4>🃏 N-마크 스페이드 카드 짝맞추기</h4>
+              <p>누적 점수가 80,000점을 넘길 때마다 월드 맵에 카드 맞추기 미니게임이 열립니다. 총 8가지 고정 패턴 중 하나로 출현하므로, 맞춘 카드는 사라지고 틀려도 다음에 그대로 유지되어 모든 파워업 아이템을 쓸어 담을 수 있습니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Controls -->
+        <div class="guide-tab-pane" id="tab-controls">
+          <div class="guide-article">
+            <div class="guide-card">
+              <h4>✈️ 무한 비행과 P-미터(P-Meter) 충전 테크닉</h4>
+              <p>하단 HUD에 있는 `>>> >>> [P]` 게이지는 [B] 버튼(달리기)을 누른 채 일정 거리를 질주하면 삐-삐- 소리와 함께 최고 속도로 충전됩니다. [P]가 점멸할 때 [A]를 점프하면 날아오르며, 이때 [A]를 리듬에 맞춰 탁-탁-탁 연타하면 하늘 높이 비행하여 스테이지의 모든 장애물을 건너뛸 수 있습니다.</p>
+            </div>
+
+            <div class="guide-card blue">
+              <h4>🪽 P-날개 (P-Wing)의 기적</h4>
+              <p>인벤토리에서 P-날개를 사용하면 해당 스테이지 내내 P-게이지가 영구 충전 상태가 되어, 떨어질 위험 없이 [A] 연타만으로 하늘 위를 무제한 날아다닐 수 있습니다. 보스 성이나 어려운 비행선 스테이지를 날로 먹을 때 최고의 아이템입니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Settings Modal -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">⚙️ 에뮬레이터 환경 설정</div>
+        <button class="modal-close-btn" id="close-settings-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Display Settings -->
+        <div class="settings-group">
+          <h3>📺 디스플레이 & 화면 필터</h3>
+          <div class="settings-row">
+            <label for="crt-filter-select">CRT 스캔라인 필터</label>
+            <select id="crt-filter-select" class="settings-select">
+              <option value="off">끄기 (선명한 픽셀 아트)</option>
+              <option value="light" selected>연함 (레트로 브라운관 TV)</option>
+              <option value="strong">강함 (클래식 아케이드 캐비닛)</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <label for="crt-curve-checkbox">브라운관 곡면 효과 (Curvature)</label>
+            <input type="checkbox" id="crt-curve-checkbox" />
+          </div>
+        </div>
+
+        <!-- Audio Settings -->
+        <div class="settings-group">
+          <h3>🔊 오디오 & 볼륨</h3>
+          <div class="settings-row">
+            <label for="volume-slider">마스터 볼륨: <span id="volume-label">100%</span></label>
+            <input type="range" id="volume-slider" min="0" max="100" value="100" style="width: 160px;" />
+          </div>
+          <div class="settings-row">
+            <label for="mute-checkbox">음소거 (Mute)</label>
+            <input type="checkbox" id="mute-checkbox" />
+          </div>
+        </div>
+
+        <!-- Input & Keybindings -->
+        <div class="settings-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>⌨️ 키보드 키 설정 안내</h3>
+            <div style="display: flex; gap: 8px;">
+              <button class="slot-btn" id="toggle-touch-controls-btn">📱 터치패드 토글</button>
+              <button class="slot-btn" id="reset-keybindings-btn">기본값 복원</button>
+            </div>
+          </div>
+          <div class="keybindings-list" id="keybindings-list"></div>
+        </div>
+
+        <!-- System Core Information -->
+        <div class="settings-group">
+          <h3>ℹ️ 에뮬레이션 엔진 정보</h3>
+          <p style="font-size: 0.8rem; color: #a4b0be; line-height: 1.6;">
+            • 코어: <strong>RetroArch Libretro FCEUMM (WebAssembly)</strong><br />
+            • 매퍼: <strong>NES Mapper 4 (MMC3 TxROM)</strong> - 래스터 IRQ 분할 및 5채널 2A03 APU 완벽 에뮬레이션<br />
+            • 프레임레이트: <strong>60.0 FPS 고정</strong><br />
+            • 상태 저장: <strong>IndexedDB 슬롯 기반 스크린샷 썸네일</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
