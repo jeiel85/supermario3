@@ -180,9 +180,28 @@ async function initApp() {
     cheatsModal.show();
   });
 
+  document.getElementById('btn-open-demo-guide')?.addEventListener('click', () => {
+    guideModal.show();
+    document.querySelectorAll('.guide-nav-tab').forEach((t) => t.classList.remove('active'));
+    document.querySelectorAll('.guide-tab-pane').forEach((p) => p.classList.remove('active'));
+    document.querySelector('.guide-nav-tab[data-tab="tab-demo"]')?.classList.add('active');
+    document.getElementById('tab-demo')?.classList.add('active');
+  });
+
   document.getElementById('btn-open-guide')?.addEventListener('click', () => {
     guideModal.show();
   });
+
+  // Start Demo Splash Action
+  const startDemoBtn = document.getElementById('btn-start-demo-action');
+  const startSplash = document.getElementById('start-demo-splash');
+  if (startDemoBtn && startSplash) {
+    startDemoBtn.addEventListener('click', () => {
+      startSplash.classList.add('hidden');
+      engine.getCanvas()?.focus();
+      showNotification('라이브 데모가 시작되었습니다! 60FPS 칩튠 사운드 활성화 완료', 'success');
+    });
+  }
 
   document.getElementById('btn-open-settings')?.addEventListener('click', () => {
     settingsModal.show();

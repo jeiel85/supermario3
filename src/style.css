@@ -171,6 +171,107 @@ body {
 }
 .toolbar-btn.btn-guide:hover { background: #f6b93b; }
 
+.toolbar-btn.btn-demo {
+  background: linear-gradient(135deg, #6c5ce7, #4834d4);
+  border-color: #a29bfe;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.4);
+}
+.toolbar-btn.btn-demo:hover {
+  background: #a29bfe;
+  color: #111;
+}
+
+/* Start Demo Splash Overlay */
+.start-demo-splash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 12, 16, 0.94);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.start-demo-splash.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-curtain {
+  background: linear-gradient(180deg, #242738 0%, #151722 100%);
+  border: 3px solid var(--mario-yellow);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(251, 208, 0, 0.3);
+  border-radius: 12px;
+  padding: 30px 40px;
+  text-align: center;
+  max-width: 520px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.splash-badge {
+  font-family: var(--pixel-font);
+  font-size: 0.65rem;
+  color: var(--mario-yellow);
+  letter-spacing: 2px;
+}
+
+.splash-title {
+  font-family: var(--pixel-font);
+  font-size: 1.15rem;
+  color: #fff;
+  text-shadow: 3px 3px 0 var(--mario-dark-red), 5px 5px 0 #000;
+  line-height: 1.4;
+}
+
+.splash-desc {
+  font-size: 0.8rem;
+  color: var(--mario-sky);
+  font-weight: 700;
+}
+
+.splash-start-btn {
+  background: linear-gradient(135deg, var(--mario-red) 0%, #b31a17 100%);
+  border: 2px solid var(--mario-yellow);
+  color: #fff;
+  font-family: var(--pixel-font);
+  font-size: 0.95rem;
+  font-weight: bold;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #1e272e, 0 10px 20px rgba(229, 37, 33, 0.4);
+  transition: all 0.1s ease;
+  margin-top: 6px;
+}
+
+.splash-start-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #1e272e, 0 12px 25px rgba(229, 37, 33, 0.6);
+}
+
+.splash-start-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #1e272e;
+}
+
+.splash-hints {
+  font-size: 0.75rem;
+  color: #a4b0be;
+}
+
 /* Main Stage Container */
 .arcade-viewport-container {
   flex: 1;
