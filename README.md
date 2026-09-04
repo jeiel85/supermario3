@@ -10,6 +10,8 @@
 
 ### 🎮 [웹에서 지금 바로 플레이하기 (Live Demo)](https://jeiel85.github.io/supermario3/)
 
+![Super Mario Bros. 3 Title Screen](test-results/02_title_menu.png)
+
 ---
 
 ## 🌟 주요 특징 (Key Features)

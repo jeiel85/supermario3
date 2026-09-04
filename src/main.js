@@ -1,4 +1,21 @@
 // Main Application Entry Point
+// Safely handle WakeLock permission denial in headless or restricted browser environments
+if (typeof navigator !== 'undefined' && navigator.wakeLock) {
+  const origRequest = navigator.wakeLock.request.bind(navigator.wakeLock);
+  navigator.wakeLock.request = async (type) => {
+    try {
+      return await origRequest(type);
+    } catch (e) {
+      return { release: async () => {} };
+    }
+  };
+}
+window.addEventListener('unhandledrejection', (e) => {
+  if (e.reason?.message?.includes('Wake Lock') || e.reason?.name === 'NotAllowedError') {
+    e.preventDefault();
+  }
+});
+
 import { EmulatorEngine } from './emulator/engine.js';
 import { StateManager } from './emulator/stateManager.js';
 import { CheatManager } from './emulator/cheats.js';
@@ -78,10 +95,11 @@ async function initApp() {
 
   // 1. Instantiate Core Engine
   const engine = new EmulatorEngine({
-    canvasContainer: document.getElementById('screen-wrapper'),
+    canvasContainer: document.getElementById('canvas-host') || document.getElementById('screen-wrapper'),
     onStatusChange: (state, label) => updateEngineStatus(state, label),
     onNotification: (msg, type) => showNotification(msg, type),
   });
+  window.__smb3_engine = engine;
 
   // 2. Instantiate State & Cheat Managers
   const stateManager = new StateManager(engine);

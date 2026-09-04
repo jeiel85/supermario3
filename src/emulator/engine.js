@@ -21,7 +21,13 @@ export class EmulatorEngine {
   async launch(romSource = null, romName = 'Super Mario Bros. 3 (USA)') {
     try {
       const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
-      const finalRomSource = romSource || `${baseUrl}roms/smb3.nes`;
+      
+      let finalRomSource = romSource;
+      if (!finalRomSource) {
+        finalRomSource = new URL(`${baseUrl}roms/smb3.nes`, window.location.href).href;
+      } else if (typeof finalRomSource === 'string' && !finalRomSource.startsWith('http://') && !finalRomSource.startsWith('https://') && !finalRomSource.startsWith('blob:') && !finalRomSource.startsWith('data:')) {
+        finalRomSource = new URL(finalRomSource, window.location.href).href;
+      }
 
       this.onStatusChange('loading', '슈퍼마리오 3 엔진 시동 중...');
       this.currentRomName = romName;
@@ -55,7 +61,8 @@ export class EmulatorEngine {
         respondToGlobalEvents: true,
         async resolveCoreJs(core) {
           try {
-            const res = await fetch(`${baseUrl}cores/fceumm_libretro.js`);
+            const url = new URL(`${baseUrl}cores/fceumm_libretro.js`, window.location.href).href;
+            const res = await fetch(url);
             if (res.ok) return await res.blob();
           } catch (e) {
             console.warn('Local core JS fetch failed, falling back to CDN:', e);
@@ -65,7 +72,8 @@ export class EmulatorEngine {
         },
         async resolveCoreWasm(core) {
           try {
-            const res = await fetch(`${baseUrl}cores/fceumm_libretro.wasm`);
+            const url = new URL(`${baseUrl}cores/fceumm_libretro.wasm`, window.location.href).href;
+            const res = await fetch(url);
             if (res.ok) return await res.blob();
           } catch (e) {
             console.warn('Local core WASM fetch failed, falling back to CDN:', e);
