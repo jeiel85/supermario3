@@ -6,6 +6,9 @@
 ![Platform](https://img.shields.io/badge/platform-Web-orange.svg)
 ![Engine](https://img.shields.io/badge/engine-WebAssembly%20FCEUMM-green.svg)
 ![FPS](https://img.shields.io/badge/FPS-60.0%20Solid-red.svg)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Play%20Now-brightgreen?style=for-the-badge&logo=google-chrome)](https://jeiel85.github.io/supermario3/)
+
+### 🎮 [웹에서 지금 바로 플레이하기 (Live Demo)](https://jeiel85.github.io/supermario3/)
 
 ---
 

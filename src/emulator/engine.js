@@ -18,8 +18,11 @@ export class EmulatorEngine {
     this.lastFrameTime = performance.now();
   }
 
-  async launch(romSource = '/roms/smb3.nes', romName = 'Super Mario Bros. 3 (USA)') {
+  async launch(romSource = null, romName = 'Super Mario Bros. 3 (USA)') {
     try {
+      const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+      const finalRomSource = romSource || `${baseUrl}roms/smb3.nes`;
+
       this.onStatusChange('loading', '슈퍼마리오 3 엔진 시동 중...');
       this.currentRomName = romName;
 
@@ -47,12 +50,12 @@ export class EmulatorEngine {
       // Launch with local core and fallback
       this.nostalgist = await Nostalgist.launch({
         core: 'fceumm',
-        rom: romSource,
+        rom: finalRomSource,
         element: canvas,
         respondToGlobalEvents: true,
         async resolveCoreJs(core) {
           try {
-            const res = await fetch('/cores/fceumm_libretro.js');
+            const res = await fetch(`${baseUrl}cores/fceumm_libretro.js`);
             if (res.ok) return await res.blob();
           } catch (e) {
             console.warn('Local core JS fetch failed, falling back to CDN:', e);
@@ -62,7 +65,7 @@ export class EmulatorEngine {
         },
         async resolveCoreWasm(core) {
           try {
-            const res = await fetch('/cores/fceumm_libretro.wasm');
+            const res = await fetch(`${baseUrl}cores/fceumm_libretro.wasm`);
             if (res.ok) return await res.blob();
           } catch (e) {
             console.warn('Local core WASM fetch failed, falling back to CDN:', e);
