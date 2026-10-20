@@ -297,3 +297,12 @@ async function initApp() {
 
 // Start on DOMContentLoaded
 window.addEventListener('DOMContentLoaded', initApp);
+
+// Offline shell + install support. Production only: in dev the SW would cache Vite's unbundled modules.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const base = import.meta.env.BASE_URL || '/';
+    navigator.serviceWorker.register(`${base}sw.js`, { scope: base })
+      .catch((err) => console.warn('Service worker registration failed:', err));
+  });
+}
